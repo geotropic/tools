@@ -32,6 +32,6 @@ for ip in $(grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' /etc/hosts
 	fi
 	
 	echo ""
-	sleep 2
+	sleep 1
 done
 
