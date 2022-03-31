@@ -6,37 +6,19 @@
 export DENYHOST="/etc/hosts.deny"
 export AUTHLOG="/var/log/auth.log"
 export LOGFILE="/var/log/ssh-lfd.log"
-export TMPFILE="/tmp/ssh-lfd.tmp"
-export HOSTLIST="/tmp/ssh-lfd.hosts"
-
-banner() {
-	log ""
-	log "  ssh-lfd.sh - l(ogin)-f(ail)-d(eny)"
-	log ""
-}
 
 log() {
 	echo $1
 	echo $1 >> $LOGFILE
 }
 
-cancel() {
-	rm -f $TMPFILE $HOSTLIST
-}
-
-trap cancel SIGINT
-
 if [ $(whoami) != "root" ]; then 
-	banner
+	echo "[+] $0 - l(ogin)-f(ail)-d(eny)"	
 	echo "[!] Error: login as root and try again."
 	exit
 fi
 
-touch $TMPFILE
-cat $AUTHLOG | grep sshd | grep "checking getaddrinfo" | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' >> $TMPFILE
-cat $AUTHLOG | grep sshd | grep "Failed password for root" | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' >> $TMPFILE
-hosts=($(sort -u $TMPFILE))
-rm -f $TMPFILE
+hosts=($(cat $AUTHLOG | grep 'sshd' | grep -E 'checking getaddrinfo|Failed password for root' | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | sort -u))
 
 for item in ${hosts[@]}; do
 	grep $item $DENYHOST 2>&1 > /dev/null
