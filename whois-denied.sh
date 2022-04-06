@@ -16,11 +16,11 @@ cancel() {
 }
 
 trap cancel SIGINT
-systemctl status tor | grep 'active' 2>&1 > /dev/null
+systemctl status tor | grep 'inactive' 2>&1 > /dev/null
 
 if [ $? == "0" ]; then
 	echo "[-] Starting tor service.."
-	sleep 5	
+	sleep 9	
 	systemctl start tor
 fi
 
