@@ -3,9 +3,9 @@
 ### ssh-lfd.sh - ssh-l(ogin)-f(ail)-d(eny)
 ##
 #
-export DENYHOST="/etc/hosts.deny"
-export AUTHLOG="/var/log/auth.log"
-export LOGFILE="/var/log/ssh-lfd.log"
+DENYHOST="/etc/hosts.deny"
+AUTHLOG="/var/log/auth.log"
+LOGFILE="/var/log/ssh-lfd.log"
 
 log() {
 	echo $1
@@ -18,7 +18,8 @@ if [ $(whoami) != "root" ]; then
 	exit
 fi
 
-hosts=($(cat $AUTHLOG | grep 'sshd' | grep -E 'checking getaddrinfo|Failed password for root' | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | sort -u))
+# Look for sshd related string-artifacts in the logs
+hosts=($(cat $AUTHLOG | grep 'sshd' | grep -E 'checking getaddrinfo|Failed password for root|Failed password for invalid user' | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | sort -u))
 
 for item in ${hosts[@]}; do
 	grep $item $DENYHOST 2>&1 > /dev/null
