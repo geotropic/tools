@@ -20,7 +20,7 @@ systemctl status tor | grep 'active' 2>&1 > /dev/null
 
 if [ $? == "0" ]; then
 	echo "[-] Starting tor service.."
-	sleep 3	
+	sleep 5	
 	systemctl start tor
 fi
 
