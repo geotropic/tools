@@ -4,12 +4,12 @@
 ### NOTE: This script uses tor for dns resolution.
 ##
 #
-export blacklist="cat /etc/hosts.deny | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | sort -t ."
-export red="\e[0;91m"
-export blue="\e[0;94m"
-export green="\e[0;92m"
-export esc="\e[0m"
-export uline="\e[4m"
+blacklist="cat /etc/hosts.deny | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | sort -t ."
+red="\e[0;91m"
+blue="\e[0;94m"
+green="\e[0;92m"
+esc="\e[0m"
+uline="\e[4m"
 
 if [ $(whoami) != "root" ]; then
     echo -e "\e${red}[!] Login as root and try again.\e${esc}"
@@ -30,7 +30,7 @@ if [ $? == "1" ]; then
 fi	
 
 for host in $(eval $blacklist); do
-	sleep .03
+	#sleep .03
 	tor-resolve -x $host > /dev/null 2>&1
 
 	if [ $? == "0" ]; then
@@ -43,6 +43,6 @@ for host in $(eval $blacklist); do
 	fi & 
 done
 
-sleep 9 
+sleep 15 
 echo -e "[${green}!${esc}] ${blue}Resolution complete:${esc} ${green}${uline}$(wc -l non-resolvers.txt resolvers.txt | grep 'total') hosts.${esc}"
 echo -e "[${green}!${esc}] ${blue}/etc/hosts.deny:${esc} ${green}${uline}$(cat /etc/hosts.deny | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | wc -l) total hosts.${esc}"
