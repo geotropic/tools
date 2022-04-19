@@ -21,7 +21,7 @@ systemctl status tor | grep 'inactive' 2>&1 > /dev/null
 if [ $? == "0" ]; then
 	echo "[-] Starting tor service.."
 	systemctl start tor
-	sleep 9	
+	sleep 5
 fi
 
 for ip in $(grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' /etc/hosts.deny | sort -uR); do
