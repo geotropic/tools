@@ -26,8 +26,13 @@ deleteProxies() {
 if [ $(whoami) != "root" ]; then
     echo "[!] Login as root and try again."
     exit 1
-elif [ ! "$(which curl)" ]; then
+fi
+
+if [ ! "$(which curl)" ]; then
     echo "[!] Install 'curl' and try again."
+    exit 1
+elif [ ! "$(which proxychains)" ]; then
+    echo "[!] Install 'proxychains' and try again."
     exit 1
 fi
 
