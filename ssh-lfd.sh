@@ -19,9 +19,9 @@ if [ $(whoami) != "root" ]; then
 fi
 
 # Look for sshd related string-artifacts in the logs
-hosts=($(cat $AUTHLOG | grep 'sshd' | grep -E 'checking getaddrinfo|Failed password for root|Failed password for invalid user' | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | sort -u))
+hosts=($(grep -a 'sshd' $AUTHLOG | grep -E 'checking getaddrinfo|Failed password for root|Failed password for invalid user' | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | sort -u))
 
-for item in ${hosts[@]}; do
+for item in ${hosts[*]}; do
 	grep $item $DENYHOST 2>&1 > /dev/null
 
 	if [ $? == "1" ]; then
