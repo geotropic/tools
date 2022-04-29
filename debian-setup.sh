@@ -112,10 +112,11 @@ if [ ! -d "/usr/local/tmp" ] && [ ! -d "/usr/local/tmp/..." ]; then
 	chmod go-rx /usr/local/tmp /usr/local/tmp/...
 fi
 
-read -p "[?] Do you want to generate root encryption keys(y/n)?" choice
+# Generate encryption keys for root
+read -p "[?] Generate encryption keys for root(y/n)? " choice
 
 if [ $choice == "y" ]; then
-	gpg --full-generate-keys
+	gpg --full-generate-key
 fi
 
 echo "[!] $0 finished. Exiting.."
