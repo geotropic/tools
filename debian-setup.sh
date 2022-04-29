@@ -112,11 +112,11 @@ if [ ! -d "/usr/local/tmp" ] && [ ! -d "/usr/local/tmp/..." ]; then
 	chmod go-rx /usr/local/tmp /usr/local/tmp/...
 fi
 
-# Set up user encryption keys
-:'
-use read -p to ask user if they want to setup key 
-and then login as user to perform operation, su after completion
-'
+read -p "[?] Do you want to generate root encryption keys(y/n)?" choice
+
+if [ $choice == "y" ]; then
+	gpg --full-generate-keys
+fi
 
 echo "[!] $0 finished. Exiting.."
 exit 0
