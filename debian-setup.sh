@@ -34,12 +34,17 @@ apt install rsync vim iw hydra python htop ntfs-3g bully aircrack-ng dsniff tor 
 	masscan nmap smbclient reaver tshark gdb build-essential curl tcpdump git gpg proxychains \
 	macchanger whois samba-client hashcat hcxtools mdk3 mdk4 winbind libnss-winbind xfce4-terminal
 
-# Disable tor from startup
-if [ "$(systemctl status tor | grep enabled)" ]; then
-	echo "[+] Removing tor from startup.."
-	systemctl disable tor > /dev/null 2>&1
-elif [ "$(systemctl status tor | grep disabled)" ]; then
-	echo "[-] tor service is already configured."
+# Configure tor for manual start and enable control port with hashed password
+grep 'ControlPort' /etc/tor/torrc | grep '#' 2>&1 > /dev/null
+
+if [ $? == "0" ]; then
+	echo "[+] Configuring /etc/tor/torrc.."
+	service tor stop 2>&1 > /dev/null
+	systemctl disable tor 2>&1 > /dev/null
+	sed -i "$(grep -n 'ControlPort' /etc/tor/torrc | cut -d ':' -f 1) s/^#//" /etc/tor/torrc
+	echo -e "\nHashedControlPassword $(tor --hash-password controlpass | grep 16)" >> /etc/tor/torrc
+elif [ $? == "1" ]; then
+	echo "[-] /etc/tor/torrc is already configured."
 fi
 
 # Configure Windows NetBIOS name resolution
