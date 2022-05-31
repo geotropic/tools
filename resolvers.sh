@@ -30,7 +30,6 @@ if [ $? == "1" ]; then
 fi	
 
 for host in $(eval $blacklist); do
-	#sleep .03
 	tor-resolve -x $host > /dev/null 2>&1
 
 	if [ $? == "0" ]; then
@@ -40,9 +39,9 @@ for host in $(eval $blacklist); do
 	elif [ $? == "1" ]; then
         echo -e "[${red}x${esc}] ${red}$host${esc} does not resolve."
         echo $host >> non-resolvers.txt
-	fi & 
+	fi 
 done
 
-sleep 15 
+sleep 5 
 echo -e "[${green}!${esc}] ${blue}Resolution complete:${esc} ${green}${uline}$(wc -l non-resolvers.txt resolvers.txt | grep 'total') hosts.${esc}"
 echo -e "[${green}!${esc}] ${blue}/etc/hosts.deny:${esc} ${green}${uline}$(cat /etc/hosts.deny | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | wc -l) total hosts.${esc}"
