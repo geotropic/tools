@@ -196,6 +196,16 @@ if [ $choice == "y" ]; then
 	done
 fi
 
+# Remove Debian 'cdrom' repos from /etc/apt/sources.list
+grep 'cdrom' /etc/apt/sources.list 2>&1 > /dev/null
+
+if [ $? == "0" ]; then
+	echo "[+] Removing 'cdrom' repos from /etc/apt/sources.list.."
+	sed -i "/cdrom/d" /etc/apt/sources.list
+elif [ $? == "1" ]; then
+	echo "[-] /etc/apt/sources.list is already configured."
+fi
+
 # Install software from Debian repos
 echo "[+] Checking for network connection.."
 ping -c 3 google.com 2>&1 > /dev/null
@@ -207,8 +217,8 @@ fi
 
 echo "[+] Installing software.."
 apt install rsync vim iw hydra ldapscripts python htop ntfs-3g bully aircrack-ng dsniff tor arp-scan \
-	nbtscan masscan nmap smbclient reaver tshark build-essential curl tcpdump git gpg proxychains \
-	whois samba samba-client hashcat hcxtools mdk3 mdk4
+	nbtscan masscan nmap smbclient reaver tshark gdb build-essential curl tcpdump git gpg proxychains \
+	macchanger whois samba samba-client hashcat hcxtools mdk3 mdk4 smartmontools
 
 # Configure tor for manual start and enable control port with hashed password
 grep 'ControlPort' /etc/tor/torrc | grep '#' 2>&1 > /dev/null
@@ -308,6 +318,7 @@ if [ "$(ls /usr/local/sbin)" ]; then
 elif [ ! "$(ls /usr/local/sbin)" ]; then
 	echo "[+] Migrating scripts into /usr/local/sbin.."
 	cp /mnt/storage/Backup/tropic-backup/sbin/* /usr/local/sbin
+	chmod go-rx /usr/local/sbin
 	chmod go-rx /usr/local/sbin/*
 fi
 
