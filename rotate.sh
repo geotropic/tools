@@ -46,6 +46,8 @@ if [ $? == "0" ]; then
     echo "[-] Adding new proxies.."
     addProxies
 elif [ $? == "1" ]; then
+	echo "[-] Modifying /etc/proxychains.conf.."	
+	sed -i "$(grep -n '9050' /etc/proxychains.conf | cut -d ':' -f 1) s/^/#/" /etc/proxychains.conf 
     echo "[-] Downloading new proxy list.."
     getProxies
     echo -e "\n# Added by rotate.sh:" >> /etc/proxychains.conf
